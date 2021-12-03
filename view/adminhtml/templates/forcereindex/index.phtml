@@ -1,0 +1,83 @@
+<?php
+/**
+ * {{controller}} {{action}} template
+ *
+ * @var $block \Expertrec\ExpertrecSiteSearch\Block\Adminhtml\Forcereindex\Index
+ */
+?>
+
+<div id="popup-modal" class="content" style="display:none;">
+   It will take few minutes to reflect in your search.
+</div>
+
+<!--<h1 class="example-list" id="h1_id"> Hi I'm here.... </h1>-->
+
+<p>
+    Full feed update happens daily, without user intervention.
+</p>
+
+<h3>What will it do?</h3>
+It will send complete feed for reindexing.
+<br>
+<br>
+<h3>When should you do it?</h3>
+You should not need to do the full feed update as it happens periodically.
+Many partial update happens to keep your data synced.
+But if you have any discrepancies in results or if your imported bunch of data in DB directly or perform DB operations
+and the results are not reflected in your results even after some time has passed then only you should press full feed update.
+<br>
+<br>
+<h3>How much time it will take?</h3>
+It will depends on your feed size as well as internet connection.
+<br>
+<br>
+<button id="click-me" type="button" class="action" data-trigger="trigger">
+    Reindex
+</button>
+
+<script>
+    require(
+        [
+            'jquery',
+            'Magento_Ui/js/modal/modal'
+        ],
+        function(
+            $,
+            modal
+        ) {
+            var options = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: true,
+                title: 'Reindex Started',
+                buttons: [{
+                    text: $.mage.__('OK'),
+                    class: '',
+                    click: function () {
+                        this.closeModal();
+                    }
+                }]
+            };
+
+            var popup = modal(options, $('#popup-modal'));
+            $("#click-me").on('click',function(){
+                $("#popup-modal").modal("openModal");
+
+                var ajaxurl = '<?php echo $block->getAjaxUrl() ?>';
+                console.log(ajaxurl, 'reindex');
+                $.ajax({
+                    url:ajaxurl,
+                    type:'POST',
+                    showLoader: false,
+                    dataType:'json',
+                    data: {form_key: window.FORM_KEY},
+                    success:function(response){
+                    },
+                    error:function (response) {
+                    }
+                });
+
+            });
+        }
+    );
+</script>

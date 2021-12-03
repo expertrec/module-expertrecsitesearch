@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_product_attribute_update_before">
+    	<observer name="catalog_product_attribute_update_before1" instance="Expertrec\ExpertrecSiteSearch\Observer\CatalogProductAttributeUpdateBefore" disabled="true"/>
+	</event>
+	<event name="catalog_product_save_after">
+    	<observer name="catalog_product_save_after1" instance="Expertrec\ExpertrecSiteSearch\Observer\CatalogProductSaveAfter" disabled="true"/>
+	</event>
+	<event name="catalog_product_delete_before">
+    	<observer name="catalog_product_delete_before1" instance="Expertrec\ExpertrecSiteSearch\Observer\CatalogProductDeleteBefore" disabled="true"/>
+	</event>
+	<!-- events -->
+</config>

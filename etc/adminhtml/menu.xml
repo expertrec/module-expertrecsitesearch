@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2015 Expertrec. All rights reserved.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../Backend/etc/menu.xsd">
+    <menu>
+        <add id="Expertrec_ExpertrecSiteSearch::expertrec_integrationstoremid" title="Integration" module="Expertrec_ExpertrecSiteSearch"  parent="Expertrec_ExpertrecSiteSearch::extension" sortOrder="30" dependsOnModule="Expertrec_ExpertrecSiteSearch" action="expertrecsitesearch/integration/storemid" resource="Expertrec_ExpertrecSiteSearch::expertrec_integrationstoremid"/>
+        <add id="Expertrec_ExpertrecSiteSearch::extension" title="Site Search" module="Expertrec_ExpertrecSiteSearch"  sortOrder="20" dependsOnModule="Expertrec_ExpertrecSiteSearch" resource="Expertrec_ExpertrecSiteSearch::expertrec_searchconfigconfig"/>
+	    <add action="expertrecsitesearch/forcereindex/index" id="Expertrec_ExpertrecSiteSearch::forcereindex_index" module="Expertrec_ExpertrecSiteSearch" parent="Expertrec_ExpertrecSiteSearch::extension" resource="Expertrec_ExpertrecSiteSearch::forcereindex_index" sortOrder="9999" title="Full Sync"/>
+        <add action="expertrecsitesearch/redirectconfig/toconf" id="Expertrec_ExpertrecSiteSearch::redirectconfig_toconf" module="Expertrec_ExpertrecSiteSearch" parent="Expertrec_ExpertrecSiteSearch::extension" resource="Expertrec_ExpertrecSiteSearch::redirectconfig_toconf" sortOrder="999" title="Configuration"/>
+        <!--AddMenu-->
+    </menu>
+</config>

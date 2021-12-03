@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2015 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../Config/etc/system_file.xsd">
+    <system>
+        <tab id="expertrecapi" translate="label" sortOrder="110">
+            <label>Expertrec Search</label>
+        </tab>
+        <section id="expertrecsection" translate="label" type="text" sortOrder="320" showInDefault="0" showInWebsite="0" showInStore="1">
+            <label>Configuration</label>
+            <tab>expertrecapi</tab>
+            <resource>Expertrec_Search::expertrec_config</resource>
+            <group id="expertrecgroup" translate="label" type="select" sortOrder="5" showInDefault="0" showInWebsite="0" showInStore="1">
+                <label>General</label>
+
+                <field id="clientid" translate="label" type="text" sortOrder="30" showInDefault="0" showInWebsite="0" showInStore="1">
+                    <label>Client ID</label>
+                    <comment><![CDATA[Enter Client ID Key]]></comment>
+                </field>
+                <field id="clientsecret" translate="label" type="text" sortOrder="40" showInDefault="0" showInWebsite="0" showInStore="1">
+                    <label>Client Secret</label>
+                    <comment><![CDATA[Enter Client Secret Key]]></comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

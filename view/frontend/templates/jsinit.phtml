@@ -1,0 +1,20 @@
+<?php
+/** @var Expertrec\ExpertrecSiteSearch\Block\Jsinit $block */
+if ($block->hasExpertrec()) {
+    $widgetLink = $block->getJSLink();
+    ?>
+
+    <script>
+        (function() {
+            var ci_search = document.createElement('script');
+            ci_search.type = 'text/javascript';
+            ci_search.async = true;
+            ci_search.src = '<?php echo /* @noEscape */ $widgetLink; ?>';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ci_search, s);
+        })();
+    </script>
+
+    <?php
+}
+?>
