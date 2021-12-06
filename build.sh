@@ -13,8 +13,8 @@ cp -r $(ls) ${temp_folder_name}/Expertrecsitesearch/
 cd ${temp_folder_name}/Expertrecsitesearch/
 rm build.sh README.md
 
-sed -i 's/0.0.0/'${version_number}'/g' etc/module.xml
-sed -i 's/0.0.0/'${version_number}'/g' composer.json
+sed -i 's/3.0.4/'${version_number}'/g' etc/module.xml
+sed -i 's/3.0.4/'${version_number}'/g' composer.json
 
 cd ${temp_folder_name}
 zip -r expertrec_expertrecsitesearch-${version_number}.zip Expertrecsitesearch

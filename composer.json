@@ -2,7 +2,7 @@
     "name": "expertrec/module-expertrecsitesearch",
     "description": "Next level search ",
     "type": "magento2-module",
-    "version": "0.0.0",
+    "version": "3.0.4",
     "license": "proprietary",
     "authors": [
         {
