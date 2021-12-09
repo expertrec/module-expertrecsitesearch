@@ -310,26 +310,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
 
-public function addDataToTable($productId, $action)
- {
+    public function addDataToTable($productId, $action)
+    {
         $model = $this->queue_fac->create();
         $model->setId($productId);
         $model->addData([ "action" => $action]);
-     try {
-         $success = $model->save();
-     } catch (\Exception $e) {
-         $this->_logger->error("Expertrec: not able to save product id " . $productId . "->" . $action . " to expertrec queue");
-     }
-     if (!$success) {
+        try {
+            $success = $model->save();
+            return "Saved successfully";
+        } catch (\Exception $e) {
             $this->_logger->error("Expertrec: not able to save product id " . $productId . "->" . $action . " to expertrec queue");
             return "Not able to save";
         }
-     return "Saved successfully";
- }
+    }
 
     private function addStartSync()
     {
-        $this->addDataToTable(-1, 'startSync');
+        $this->addDataToTable(0, 'startSync');
     }
     public function deleteAllEntries()
     {
@@ -361,7 +358,18 @@ public function addDataToTable($productId, $action)
             }
 
             $this->_logger->Info("Expertec: full insert data " , $out );
-            $connection->insertMultiple($table, $out);
+            if($out){
+                try{
+                    $connection->insertMultiple($table, $out);
+                }
+                catch(\Exception $e){
+                    $this->_logger->Info('Expertrec:');
+                    $this->_logger->Info($e);
+                }
+            }
+            else{
+                $this->_logger->Info("Expertrec: page was empty");
+            }
         }
         return "added all products to db";
     }
