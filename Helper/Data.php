@@ -53,14 +53,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 	}
 
     public function sendToServer($data) {
-
+        $this->_logger->info("Expertrec: sending post request");
 	    $store_id_val = $this->getFirstExpertrecStoreId();
         $ExpertrecId = $this->getConfigValue('clientid', $store_id_val);
         $ExpertrecKey = $this->getConfigValue('clientsecret', $store_id_val);
         $request_url = $this->getDataEndpoint() . $ExpertrecId . '/batch';
 
         $this->send_post_request($request_url, $data, $ExpertrecKey);
-
+        $this->_logger->info("Expertrec: post request sent");
         return "Success";
     }
 
@@ -111,6 +111,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         ];
         
         $response_data = $this->constvalues->fetch_org_data_from_server($request_url, $data, false, $this);
+        $this->_logger->info("Expertrec: org data: " . print_r($response_data, true));
         return $response_data;
     }
 
@@ -218,6 +219,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     public function sendDeltaSync($data) {
+        $this->_logger->info("Expertrec: sendDeltaSync called");
 	    $requests = [];
 	    $updates = [];
 	    $endSyncId = false;
@@ -231,6 +233,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 break;
             }
         }
+        $this->_logger->info("Expertrec: store org mapping : " . print_r($store_org_mapping, true));
 	    foreach($data as $pid_action) {
 
 	        $id = $pid_action->getId();
@@ -267,6 +270,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         $post_body = array("requests" => $requests);
+        $this->_logger->info("Expertrec: send to server data: " . print_r($post_body, true));
 	    $this->sendToServer($post_body);
 
     }
@@ -317,6 +321,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $model->addData([ "action" => $action]);
         try {
             $success = $model->save();
+            $this->_logger->info("Expertrec: adding data to table");
             return "Saved successfully";
         } catch (\Exception $e) {
             $this->_logger->error("Expertrec: not able to save product id " . $productId . "->" . $action . " to expertrec queue");
@@ -330,6 +335,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     public function deleteAllEntries()
     {
+        $this->_logger->info("Expertrec: deleting all data from table");
         $queue_col = $this->queue_col_fac->create();
         $queue_col->load();
         $queue_col->walk('delete');
@@ -391,14 +397,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->_logger->info("Expertrec: data " . json_encode($result));
             $this->sendDeltaSync($queue_col);
             $this->deleteTheseEntries($queue_col);
+            $this->_logger->info("Expertrec: successfully sent all edits");
             return "successfully sent all edits";
         } else {
+            $this->_logger->info("Expertrec: nothing to send");
             return "Nothing to send";
         }
     }
 
     public function deleteTheseEntries($queue_col)
     {
+        $this->_logger->info("Expertrec: deleting given entries from table " . print_r($queue_col, true));
         $queue_col->walk('delete');
     }
 

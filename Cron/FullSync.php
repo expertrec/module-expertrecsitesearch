@@ -14,6 +14,7 @@ class FullSync {
  
     public function execute() {
     	try{
+            $this->logger->info("Expertrec: CRON got called: sendFullSync");
             $this->helper->sendFullSync();
 	        return $this;
 	    }

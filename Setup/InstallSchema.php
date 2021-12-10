@@ -65,7 +65,7 @@ class InstallSchema implements InstallSchemaInterface
         $this->logger->info("Expertrec: Store Support Email: " . $admin_email);
 
         $org_data = $this->helperData->fetchOrgData($user_name, $admin_email);
-        $this->logger->info("Expertrec: Install of expertrec plugin called, setting up db");
+        $this->logger->info("Expertrec: Install of expertrec plugin called, writing to config");
         $storeManagerDataList = $this->storeManagerData->getStores();
         foreach ($storeManagerDataList as $key => $value) {
             $store_id_val = $key;
@@ -77,6 +77,7 @@ class InstallSchema implements InstallSchemaInterface
         /**
          * Create table 'queue'
          */
+        $this->logger->info("Expertrec: Adding table to DB");
         $tableName = $setup->getTable('expertrec_queue');
 
         if ($setup->getConnection()->isTableExists($tableName) != true) {
@@ -108,6 +109,7 @@ class InstallSchema implements InstallSchemaInterface
         try{
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $entityType = $objectManager->get('Magento\Eav\Model\Config')->getEntityType('catalog_product');
+            $this->logger->info("Expertrec: catalog_product found, sendFullSync called");
             $this->helperData->sendFullSync();
             $this->helperData->deltaSync();
         }

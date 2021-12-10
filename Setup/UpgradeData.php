@@ -16,6 +16,7 @@ class UpgradeData implements UpgradeDataInterface{
         try{
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $entityType = $objectManager->get('Magento\Eav\Model\Config')->getEntityType('catalog_product');
+            $this->logger->Info("Expertrec: in Upgrade Data: catalog_product entity found, calling sendFullSync");
             $this->helperData->sendFullSync();
         }
         catch(\Magento\Framework\Exception\LocalizedException $e){
