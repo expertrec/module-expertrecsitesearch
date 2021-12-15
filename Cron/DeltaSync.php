@@ -14,7 +14,7 @@ class DeltaSync {
  
     public function execute() {
     	try{
-            $this->logger->info("Expertrec: cron got called");
+            $this->logger->info("Expertrec: cron got called: deltaSync");
 
             $this->helper->deltaSync();
 
