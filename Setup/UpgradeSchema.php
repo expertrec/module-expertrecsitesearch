@@ -6,7 +6,7 @@
 
 namespace Expertrec\ExpertrecSiteSearch\Setup;
 
-use Magento\Framework\Setup\InstallSchemaInterface;
+use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Expertrec\ExpertrecSiteSearch\Helper\Data;
@@ -15,7 +15,7 @@ use \Magento\Framework\DB\Ddl\Table;
 /**
  * @codeCoverageIgnore
  */
-class InstallSchema implements InstallSchemaInterface
+class UpgradeSchema implements UpgradeSchemaInterface
 {    private $logger;
 
     /**
@@ -44,38 +44,55 @@ class InstallSchema implements InstallSchemaInterface
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
 
         $setup->startSetup();
-
-        // Using ident_support way
-        $user_name = $this->scopeConfig->getValue('trans_email/ident_support/username', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        $admin_email = $this->scopeConfig->getValue('trans_email/ident_support/email', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-        
-        // using admin auth way
-        // $user_name = $this->adminInfo->getUser()->getUsername();
-        // $email = $this->adminInfo->getUser()->getEmail();
-
-        // hardcoded
-        // $user_name = "unknown";
-        // $admin_email = "john@doe.com";
-
+        /**
+         * Fetch username and email
+         * Set default name, then try for admin else support one
+         */
+        $user_name = "johndoe";
+        $admin_email = "john@doe.com";
+        try{
+            $this->logger->info("Expertrec: Trying to get admin data from DB");
+            $admin_data = $this->helperData->getAdminData();
+            $user_name = $admin_data[0]['username'];
+            $admin_email = $admin_data[0]['email'];
+        }
+        catch(\Exception $e){
+            $this->logger->info("Expertrec: Couldn't get admin data, proceeding with ident support");
+            $user_name = $this->scopeConfig->getValue('trans_email/ident_support/username', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $admin_email = $this->scopeConfig->getValue('trans_email/ident_support/email', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        }
+        $this->logger->info("Expertrec: Install of expertrec plugin called, writing to config");
         $this->logger->info("Expertrec: Store Support Name: " . $user_name);
         $this->logger->info("Expertrec: Store Support Email: " . $admin_email);
 
-        $org_data = $this->helperData->fetchOrgData($user_name, $admin_email);
-        $this->logger->info("Expertrec: Install of expertrec plugin called, writing to config");
-        $storeManagerDataList = $this->storeManagerData->getStores();
-        foreach ($storeManagerDataList as $key => $value) {
-            $store_id_val = $key;
-            $this->configWriter->save('expertrecsection/expertrecgroup/clientid',  $org_data->mid, $scope = 'stores', $scopeId = $store_id_val);
-            $this->configWriter->save('expertrecsection/expertrecgroup/clientsecret',  $org_data->write_key, $scope = 'stores', $scopeId = $store_id_val);
-            break;
-        }
-
         /**
-         * Create table 'queue'
+         * Check whether api id and key is there in table
+         * if no, create a new one
+         */
+        $config = $setup->getTable('core_config_data');
+        $currentOrg = $setup->getConnection()
+                            ->query('SELECT value FROM ' . $config . ' WHERE path LIKE "expertrecsection%"')
+                            ->fetchAll();
+        $clientIdPath = 'expertrecsection/expertrecgroup/clientid';
+        $clientSecretPath = 'expertrecsection/expertrecgroup/clientsecret';
+        // check if client id and secret are already present
+        if(count($currentOrg) != 2){
+            $this->logger->info("Expertrec: client id and secret key not found, fetching from server");
+            $org_data = $this->helperData->fetchOrgData($user_name, $admin_email);
+            $storeManagerDataList = $this->storeManagerData->getStores();
+            foreach ($storeManagerDataList as $key => $value) {
+                $store_id_val = $key;
+                $this->configWriter->save($clientIdPath,  $org_data->mid, $scope = 'stores', $scopeId = $store_id_val);
+                $this->configWriter->save($clientSecretPath,  $org_data->write_key, $scope = 'stores', $scopeId = $store_id_val);
+                break;
+            }
+        }
+        /**
+         * Create table 'queue' if not exists
          */
         $this->logger->info("Expertrec: Adding table to DB");
         $tableName = $setup->getTable('expertrec_queue');
@@ -104,17 +121,6 @@ class InstallSchema implements InstallSchemaInterface
                 )
                 ->setComment('Queue');
             $setup->getConnection()->createTable($table);
-        }
-        
-        try{
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $entityType = $objectManager->get('Magento\Eav\Model\Config')->getEntityType('catalog_product');
-            $this->logger->info("Expertrec: catalog_product found, sendFullSync called");
-            $this->helperData->sendFullSync();
-            $this->helperData->deltaSync();
-        }
-        catch(\Magento\Framework\Exception\LocalizedException $e){
-            $this->logger->Info("Expertrec: catalog_product entity not found, will call sendFullSync() later");
         }
         $setup->endSetup();
     }

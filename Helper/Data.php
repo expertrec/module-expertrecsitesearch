@@ -60,8 +60,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $request_url = $this->getDataEndpoint() . $ExpertrecId . '/batch';
 
         $this->send_post_request($request_url, $data, $ExpertrecKey);
-        $this->_logger->info("Expertrec: post request sent");
+        $this->_logger->info("Expertrec: post request sent to url");
         return "Success";
+    }
+
+    public function getAdminData(){
+        $connection = $this->resourceConnection->getConnection();
+        $table = $connection->getTableName('admin_user');
+        $query = "select username, email from " . $table;
+        $result = $connection->fetchAll($query);
+        $this->_logger->info("Expertrec: " . print_r($result, true));
+        return $result;
     }
 
     public function getServiceUrl() {
@@ -270,7 +279,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         $post_body = array("requests" => $requests);
-        $this->_logger->info("Expertrec: send to server data: " . print_r($post_body, true));
+        $this->_logger->info("Expertrec: send to server data");
 	    $this->sendToServer($post_body);
 
     }
@@ -331,7 +340,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function addStartSync()
     {
-        $this->addDataToTable(0, 'startSync');
+        // $this->addDataToTable(0, 'startSync');
+        $connection= $this->resourceConnection->getConnection();
+
+        $table = $this->resourceConnection->getTableName('expertrec_queue');
+        $sql = "INSERT INTO " . $table . "(product_id, action) VALUES ('0', 'startSync')";
+        $connection->query($sql);
+        $this->_logger->info("Added startSync " . $sql);
     }
     public function deleteAllEntries()
     {
@@ -349,8 +364,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $collection->setPageSize(10000);
         $pageCount = $collection->getLastPageNumber();
         // TODO: add check for total 99999999 number of products
-        // -1           startsync
-        // 0-99999998   products (total 99999999)
+        // 0           startsync
+        // 1-99999998   products (total 99999998)
         // 99999999     endsync
         $this->_logger->Info("Expertec: total page number " . $pageCount );
         // https://magento.stackexchange.com/questions/177465/why-is-setpagesize-and-setcurpage-functions-not-working-with-the-collecti
@@ -360,7 +375,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $collection->load();
             $out = [];
             foreach($collection as $p) {
-                $out[] = [ "product_id" => $p->getId(), "action" => "update" ];
+                $pid = $p->getId();
+                if($pid == 99999999){
+                    break;
+                }
+                $out[] = [ "product_id" => $pid, "action" => "update" ];
             }
 
             $this->_logger->Info("Expertec: full insert data " , $out );
@@ -382,7 +401,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function addEndSync()
     {
         // we will only support max 100Million products
-        $this->addDataToTable(99999999, 'endSync');
+        // $this->addDataToTable(99999999, 'endSync');
+        $connection= $this->resourceConnection->getConnection();
+
+        $table = $this->resourceConnection->getTableName('expertrec_queue');
+        $sql = "INSERT INTO " . $table . "(product_id, action) VALUES ('99999999', 'endSync')";
+        $connection->query($sql);
+        $this->_logger->info("Added endSync " . $sql);
     }
 
     public function deltaSync()
@@ -407,8 +432,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function deleteTheseEntries($queue_col)
     {
-        $this->_logger->info("Expertrec: deleting given entries from table " . print_r($queue_col, true));
+        $this->_logger->info("Expertrec: deleting given entries from table");
         $queue_col->walk('delete');
     }
 
+    public function log_to_endpoint($post_data){
+        $url = "http://log2.expertrec.com/v2/collect/magento";
+        $this->send_post_request($url, $post_data, null);
+    }
 }

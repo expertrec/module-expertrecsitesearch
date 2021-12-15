@@ -11,6 +11,7 @@ class Queue extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     protected function _construct()
     {
         $this->_init('expertrec_queue', 'product_id');
-        $this->_isPkAutoIncrement = false;
+        // no need to specifically turn off auto-increment, it can cause error in data generation
+        // $this->_isPkAutoIncrement = false;
     }
 }

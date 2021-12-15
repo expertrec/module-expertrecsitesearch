@@ -8,8 +8,10 @@ use Expertrec\ExpertrecSiteSearch\Helper\Data;
 
 class UpgradeData implements UpgradeDataInterface{
     protected $helperData;
-    public function __construct(Data $helperData){
+    private $logger;
+    public function __construct(\Psr\Log\LoggerInterface $logger, Data $helperData){
         $this->helperData = $helperData;
+        $this->logger = $logger;
     }
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context){
         $setup->startSetup();
@@ -19,8 +21,14 @@ class UpgradeData implements UpgradeDataInterface{
             $this->logger->Info("Expertrec: in Upgrade Data: catalog_product entity found, calling sendFullSync");
             $this->helperData->sendFullSync();
         }
-        catch(\Magento\Framework\Exception\LocalizedException $e){
+        catch(\Exception $e){
+            $this->helperData->log_to_endpoint('{
+                    "location":"UpgradeData.php",
+                    "data":"'. $e->getMessage() .' : catalog_product entity not found, will call sendFullSync() later",
+                    "trace":"' . $e->getTraceAsString() . ' "
+                }');
             $this->logger->Info("Expertrec: in Upgrade Data: catalog_product entity not found");
+            $this->logger->Info($e);
         }
         $setup->endSetup();
     }
